@@ -14,7 +14,7 @@ class Paso2 extends StatelessWidget {
         children: [
           Text('Nombre', style: textTheme.titleMedium),
           const SizedBox(height: 8),
-          const TextField(
+          TextField(
             readOnly: true,
             decoration: InputDecoration(
               hintText: 'ej. Miguel Vera',

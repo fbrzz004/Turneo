@@ -7,39 +7,16 @@ class MisCalendariosScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Mis Calendarios', style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () {},
-          ),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: ListView(
+        children: [
+          _buildCalendarItem(context, "1", "Calendario 1", "En Espera", const Color(0xFFFDE047), false),
+          const SizedBox(height: 16),
+          _buildCalendarItem(context, "2", "Calendario 2", "Completado", const Color(0xFF86EFAC), true),
+          const SizedBox(height: 16),
+          _buildCalendarItem(context, "3", "Calendario 3", "Completado", const Color(0xFF86EFAC), true),
         ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            _buildCalendarItem(context, "1", "Calendario 1", "En Espera", const Color(0xFFFDE047), false),
-            const SizedBox(height: 16),
-            _buildCalendarItem(context, "2", "Calendario 2", "Completado", const Color(0xFF86EFAC), true),
-            const SizedBox(height: 16),
-            _buildCalendarItem(context, "3", "Calendario 3", "Completado", const Color(0xFF86EFAC), true),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CrearCalendarioScreen()),
-          );
-        },
-        child: const Icon(Icons.add),
       ),
     );
   }

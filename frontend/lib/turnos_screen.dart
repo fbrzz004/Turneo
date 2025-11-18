@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-// import 'calendario_screen.dart';
+import 'gerente_main_screen.dart';
 
 class TurnosScreen extends StatefulWidget {
   const TurnosScreen({super.key});
@@ -70,15 +70,16 @@ class _TurnosScreenState extends State<TurnosScreen> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (int index) {
-          // if (index == 1){
-          //   Navigator.push(
-          //     context,
-          //     PageRouteBuilder(pageBuilder: (context, anim1, anim2) => const CalendarioScreen(),
-          //     transitionDuration:  Duration.zero,
-          //     reverseTransitionDuration: Duration.zero,
-          //     ),
-          //   );
-          // } else {
+          if (index == 1){
+            Navigator.pushReplacement(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, anim1, anim2) => const GerenteMainScreen(),
+                transitionDuration: Duration.zero,
+                reverseTransitionDuration: Duration.zero,
+              ),
+            );
+          } else {
             setState(() {
               _selectedIndex = index;
             });
@@ -149,15 +150,15 @@ class _TurnosScreenState extends State<TurnosScreen> {
                     // Permite que esta parte del texto sea clicable
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
-                        // // Cambia el índice de la barra de navegación
-                        // Navigator.pushReplacement(
-                        //   context,
-                        //   PageRouteBuilder(
-                        //     pageBuilder: (context, anim1, anim2) => const CalendarioScreen(),
-                        //     transitionDuration: Duration.zero,
-                        //     reverseTransitionDuration: Duration.zero,
-                        //   ),
-                        // );
+                        // Cambia el índice de la barra de navegación
+                        Navigator.pushReplacement(
+                          context,
+                          PageRouteBuilder(
+                            pageBuilder: (context, anim1, anim2) => const GerenteMainScreen(),
+                            transitionDuration: Duration.zero,
+                            reverseTransitionDuration: Duration.zero,
+                          ),
+                        );
                       },
                   ),
                   const TextSpan(text: '.'),
