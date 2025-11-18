@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node index.js"
+    "dev": "node index.js",
+    "greedy": "node algorithm/main.js"
   },
   "keywords": [],
   "author": "",
