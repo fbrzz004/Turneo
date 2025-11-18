@@ -1,7 +1,73 @@
 import 'package:flutter/material.dart';
+import '../models/empleado.dart';
+import '../services/empleado_service.dart';
+import '../services/rol_service.dart'; // Necesitamos cargar los roles reales
+import '../models/rol.dart';
 
-class AgregarEmpleadoScreen extends StatelessWidget {
+class AgregarEmpleadoScreen extends StatefulWidget {
   const AgregarEmpleadoScreen({super.key});
+
+  @override
+  State<AgregarEmpleadoScreen> createState() => _AgregarEmpleadoScreenState();
+}
+
+class _AgregarEmpleadoScreenState extends State<AgregarEmpleadoScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _nombreController = TextEditingController();
+  final _correoController = TextEditingController();
+
+  String? _selectedRol;
+  List<Rol> _rolesDisponibles = [];
+
+  final _empleadoService = EmpleadoService();
+  final _rolService = RolService();
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarRoles();
+  }
+
+  Future<void> _cargarRoles() async {
+    final roles = await _rolService.listarRoles();
+    setState(() {
+      _rolesDisponibles = roles;
+    });
+  }
+
+  Future<void> _guardarEmpleado() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        final nuevoEmpleado = Empleado(
+          nombre: _nombreController.text.trim(),
+          correo: _correoController.text.trim(),
+          rol: _selectedRol!,
+          // CLAVE POR DEFECTO
+          contrasena: '123456',
+          estado: 'PENDIENTE',
+        );
+
+        await _empleadoService.crearEmpleado(nuevoEmpleado);
+
+        if(!mounted) return;
+
+        // Mostrar feedback
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Empleado creado. Contraseña temporal: 123456'),
+            duration: Duration(seconds: 4),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context);
+
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: El correo ya podría existir')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -9,140 +75,129 @@ class AgregarEmpleadoScreen extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      // 1. AppBar con título y un ícono de ajustes (similar al anterior)
       appBar: AppBar(
         title: const Text('Agregar Empleado'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () {},
-          ),
-        ],
         backgroundColor: colorScheme.surface,
         elevation: 0,
       ),
-
-      // 2. Contenido principal con el formulario
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            const SizedBox(height: 16),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              const SizedBox(height: 16),
+              Text('Agregar empleado',
+                  style: textTheme.headlineLarge
+                      ?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 24),
 
-            // Título de la sección
-            Text(
-              'Agregar empleado',
-              style: textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 24),
-
-            // Campo para Nombre
-            TextFormField(
-              decoration: InputDecoration(
-                labelText: 'Nombre',
-                hintText: 'ej. Miguel Vera',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                  borderSide: BorderSide.none,
+              // Nombre
+              TextFormField(
+                controller: _nombreController,
+                validator: (v) => v!.isEmpty ? 'Campo requerido' : null,
+                textCapitalization: TextCapitalization.words,
+                decoration: InputDecoration(
+                  labelText: 'Nombre',
+                  hintText: 'ej. Miguel Vera',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: BorderSide.none),
+                  filled: true,
+                  fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
                 ),
-                filled: true,
-                fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            // Campo para Correo
-            TextFormField(
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
-                labelText: 'Correo',
-                hintText: 'ej. mickyvera@gmail.com',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                  borderSide: BorderSide.none,
+              // Correo
+              TextFormField(
+                controller: _correoController,
+                validator: (v) => !v!.contains('@') ? 'Correo inválido' : null,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  labelText: 'Correo',
+                  hintText: 'ej. mickyvera@gmail.com',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: BorderSide.none),
+                  filled: true,
+                  fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
                 ),
-                filled: true,
-                fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            // Dropdown para Rol
-            DropdownButtonFormField<String>(
-              decoration: InputDecoration(
-                labelText: 'Rol',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                  borderSide: BorderSide.none,
+              // Rol
+              DropdownButtonFormField<String>(
+                validator: (v) => v == null ? 'Selecciona un rol' : null,
+                decoration: InputDecoration(
+                  labelText: 'Rol',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: BorderSide.none),
+                  filled: true,
+                  fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
                 ),
-                filled: true,
-                fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+                hint: const Text('Seleccionar...'),
+                value: _selectedRol,
+                // Si no hay roles, muestra aviso o lista vacia
+                items: _rolesDisponibles.isEmpty
+                    ? []
+                    : _rolesDisponibles.map((rol) => DropdownMenuItem(
+                  value: rol.nombre,
+                  child: Text(rol.nombre),
+                )).toList(),
+                onChanged: (value) {
+                  setState(() => _selectedRol = value);
+                },
               ),
-              hint: const Text('ej. Mesero'),
-              items: const [
-                DropdownMenuItem(value: 'Mesero', child: Text('Mesero')),
-                DropdownMenuItem(value: 'Cajero', child: Text('Cajero')),
-              ],
-              onChanged: (value) {},
-            ),
-            const SizedBox(height: 32),
+              const SizedBox(height: 32),
 
-            // Botones de Acción
-            Row(
-              children: [
-                // Botón Aceptar (estilo principal)
-                Expanded(
-                  child: FilledButton.icon(
-                    icon: const Icon(Icons.check),
-                    label: const Text('Aceptar'),
-                    onPressed: () {
-                      // Lógica de aceptar (vacío)
-                      Navigator.pop(context); // Regresa a la pantalla anterior
-                    },
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      // Usamos un color personalizado para que coincida con el mockup
-                      backgroundColor: const Color(0xFF6750A4),
-                      foregroundColor: Colors.white,
+              // Botones
+              Row(
+                children: [
+                  Expanded(
+                    child: FilledButton.icon(
+                      icon: const Icon(Icons.check),
+                      label: const Text('Aceptar'),
+                      onPressed: _guardarEmpleado,
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: const Color(0xFF6750A4),
+                        foregroundColor: Colors.white,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 16),
-
-                // Botón Cancelar (estilo secundario)
-                Expanded(
-                  child: FilledButton.icon(
-                    icon: const Icon(Icons.cancel_outlined),
-                    label: const Text('Cancelar'),
-                    onPressed: () {
-                      Navigator.pop(context); // Regresa a la pantalla anterior
-                    },
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      // Usamos un color rojo para indicar cancelación
-                      backgroundColor: const Color(0xFFB3261E),
-                      foregroundColor: Colors.white,
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: FilledButton.icon(
+                      icon: const Icon(Icons.cancel_outlined),
+                      label: const Text('Cancelar'),
+                      onPressed: () => Navigator.pop(context),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: const Color(0xFFB3261E),
+                        foregroundColor: Colors.white,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Nota informativa
-            Row(
-              children: [
-                const Icon(Icons.info_outline, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Se le enviará una notificación al correo del empleado para crear su cuenta.',
-                    style: textTheme.bodySmall,
+                ],
+              ),
+              const SizedBox(height: 24),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.info_outline, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'El empleado deberá cambiar su contraseña la primera vez que inicie sesión. (Clave temporal: 123456)',
+                      style: textTheme.bodySmall,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

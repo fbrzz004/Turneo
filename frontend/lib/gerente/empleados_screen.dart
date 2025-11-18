@@ -1,166 +1,240 @@
 import 'package:flutter/material.dart';
-
-// Placeholder para la pantalla de agregar empleado
+import '../models/empleado.dart';
+import '../services/empleado_service.dart';
 import 'agregar_empleado_screen.dart';
-// Placeholder para la pantalla de editar empleado
 import 'editar_empleado_screen.dart';
 
-class EmpleadosScreen extends StatelessWidget {
+class EmpleadosScreen extends StatefulWidget {
   const EmpleadosScreen({super.key});
+
+  @override
+  State<EmpleadosScreen> createState() => _EmpleadosScreenState();
+}
+
+class _EmpleadosScreenState extends State<EmpleadosScreen> {
+  final _empleadoService = EmpleadoService();
+  List<Empleado> _todosLosEmpleados = [];
+  List<Empleado> _empleadosFiltrados = [];
+  bool _isLoading = true;
+
+  // Controladores para filtros
+  final _searchController = TextEditingController();
+  String? _filtroRol;
+  String? _filtroEstado;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarEmpleados();
+  }
+
+  Future<void> _cargarEmpleados() async {
+    final lista = await _empleadoService.listarEmpleados();
+    if (!mounted) return;
+    setState(() {
+      _todosLosEmpleados = lista;
+      _aplicarFiltros(); // Inicializa la lista filtrada
+      _isLoading = false;
+    });
+  }
+
+  void _aplicarFiltros() {
+    setState(() {
+      _empleadosFiltrados = _todosLosEmpleados.where((emp) {
+        // Filtro por Nombre
+        final nombreMatch = emp.nombre
+            .toLowerCase()
+            .contains(_searchController.text.toLowerCase());
+        // Filtro por Rol
+        final rolMatch = _filtroRol == null || emp.rol == _filtroRol;
+        // Filtro por Estado
+        final estadoMatch =
+            _filtroEstado == null || emp.estado == _filtroEstado;
+
+        return nombreMatch && rolMatch && estadoMatch;
+      }).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
+    // Obtenemos roles únicos para llenar el dropdown dinámicamente (opcional)
+    final rolesDisponibles = _todosLosEmpleados.map((e) => e.rol).toSet().toList();
+
     return Scaffold(
-      // 1. AppBar con título y un ícono de ajustes
       appBar: AppBar(
-        // El título se alinea a la izquierda por defecto en M3
         title: const Text('Empleados registrados'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () {
-              // Lógica para los ajustes (vacío por ahora)
-            },
+            icon: const Icon(Icons.refresh),
+            onPressed: _cargarEmpleados,
           ),
         ],
-        // Damos un color de fondo para que combine con el diseño
         backgroundColor: colorScheme.surface,
-        elevation: 0, // Sin sombra
+        elevation: 0,
       ),
-
-      // 2. FAB para agregar nuevos empleados
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          // Esperamos a que vuelva de la pantalla agregar para recargar
+          await Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const AgregarEmpleadoScreen()),
+            MaterialPageRoute(
+                builder: (context) => const AgregarEmpleadoScreen()),
           );
+          _cargarEmpleados();
         },
         child: const Icon(Icons.add),
       ),
-
-      // 3. Contenido principal de la pantalla
-      body: Padding(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: ListView( // Usamos ListView para que sea "scrollable"
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 16),
-
-            // Título "Mi equipo"
-            Text(
-              'Mi equipo',
-              style: textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
+            Text('Mi equipo',
+                style: textTheme.headlineLarge
+                    ?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 24),
 
-            // Campo de búsqueda por Nombre
+            // Buscador
             TextField(
+              controller: _searchController,
+              onChanged: (_) => _aplicarFiltros(),
               decoration: InputDecoration(
-                labelText: 'Nombre',
-                hintText: 'ej. Miguel Vera',
+                labelText: 'Buscar por nombre',
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
+                fillColor:
+                colorScheme.surfaceVariant.withOpacity(0.5),
               ),
             ),
             const SizedBox(height: 16),
 
-            // Dropdown para Rol
-            DropdownButtonFormField<String>(
-              decoration: InputDecoration(
-                labelText: 'Rol',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
-              ),
-              hint: const Text('ej. Mesero'),
-              items: const [
-                DropdownMenuItem(value: 'Mesero', child: Text('Mesero')),
-                DropdownMenuItem(value: 'Cajero', child: Text('Cajero')),
-              ],
-              onChanged: (value) {},
-            ),
-            const SizedBox(height: 16),
-
-            // Dropdown para Estado
-            DropdownButtonFormField<String>(
-              decoration: InputDecoration(
-                labelText: 'Estado',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: colorScheme.surfaceVariant.withOpacity(0.5),
-              ),
-              hint: const Text('ej. Activo'),
-              items: const [
-                DropdownMenuItem(value: 'Activo', child: Text('Activo')),
-                DropdownMenuItem(value: 'Inactivo', child: Text('Inactivo')),
-              ],
-              onChanged: (value) {},
-            ),
-            const SizedBox(height: 32),
-
-            // Grilla de empleados (con datos de ejemplo)
-            GridView.count(
-              crossAxisCount: 2, // Dos columnas
-              shrinkWrap: true, // Para que funcione dentro de un ListView
-              physics: const NeverScrollableScrollPhysics(), // Desactiva el scroll de la grilla
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 0.8, // Ajusta la proporción de las tarjetas
+            // Filtros Row
+            Row(
               children: [
-                _buildEmployeeCard(
-                  context,
-                  name: 'Micky Vera',
-                  role: 'Mesero',
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const EditarEmpleadoScreen()));
-                  }
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    decoration: InputDecoration(
+                      labelText: 'Rol',
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                          borderSide: BorderSide.none),
+                      filled: true,
+                      fillColor:
+                      colorScheme.surfaceVariant.withOpacity(0.5),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                    ),
+                    value: _filtroRol,
+                    items: [
+                      const DropdownMenuItem(
+                          value: null, child: Text("Todos")),
+                      ...rolesDisponibles.map((rol) => DropdownMenuItem(
+                          value: rol, child: Text(rol))),
+                    ],
+                    onChanged: (value) {
+                      _filtroRol = value;
+                      _aplicarFiltros();
+                    },
+                  ),
                 ),
-                _buildEmployeeCard(
-                  context,
-                  name: 'Richi Towers',
-                  role: 'Cajero',
-                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const EditarEmpleadoScreen()));
-                  }
+                const SizedBox(width: 16),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    decoration: InputDecoration(
+                      labelText: 'Estado',
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                          borderSide: BorderSide.none),
+                      filled: true,
+                      fillColor:
+                      colorScheme.surfaceVariant.withOpacity(0.5),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                    ),
+                    value: _filtroEstado,
+                    items: const [
+                      DropdownMenuItem(value: null, child: Text("Todos")),
+                      DropdownMenuItem(
+                          value: 'ACTIVO', child: Text('Activo')),
+                      DropdownMenuItem(
+                          value: 'PENDIENTE', child: Text('Pendiente')),
+                      DropdownMenuItem(
+                          value: 'INACTIVO', child: Text('Inactivo')),
+                    ],
+                    onChanged: (value) {
+                      _filtroEstado = value;
+                      _aplicarFiltros();
+                    },
+                  ),
                 ),
               ],
             ),
-             const SizedBox(height: 16),
-            // Un indicador de carga para simular que hay más contenido
-            const Center(
-              child: CircularProgressIndicator(),
+            const SizedBox(height: 24),
+
+            // Grilla
+            Expanded(
+              child: _empleadosFiltrados.isEmpty
+                  ? const Center(child: Text("No se encontraron empleados"))
+                  : GridView.builder(
+                itemCount: _empleadosFiltrados.length,
+                gridDelegate:
+                const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: 0.8,
+                ),
+                itemBuilder: (context, index) {
+                  final empleado = _empleadosFiltrados[index];
+                  return _buildEmployeeCard(
+                    context,
+                    empleado: empleado,
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              EditarEmpleadoScreen(
+                                  empleado: empleado),
+                        ),
+                      );
+                      _cargarEmpleados();
+                    },
+                  );
+                },
+              ),
             ),
-            const SizedBox(height: 80), // Espacio para que el FAB no tape contenido
           ],
         ),
       ),
     );
   }
 
-  // Widget helper para construir las tarjetas de empleado
-  Widget _buildEmployeeCard(BuildContext context, {required String name, required String role, VoidCallback? onTap}) {
+  Widget _buildEmployeeCard(BuildContext context,
+      {required Empleado empleado, VoidCallback? onTap}) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+
+    // Color diferente si está pendiente
+    final isPending = empleado.estado == 'PENDIENTE';
 
     return GestureDetector(
       onTap: onTap,
       child: Card(
-        // El color de la tarjeta será un poco más claro que el fondo
-        color: colorScheme.surfaceVariant.withOpacity(0.3),
+        color: isPending
+            ? Colors.orange.withOpacity(0.2)
+            : colorScheme.surfaceVariant.withOpacity(0.3),
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.0),
@@ -170,24 +244,31 @@ class EmpleadosScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Icono de placeholder (como en el mockup)
               Icon(
-                Icons.person,
+                isPending ? Icons.access_time : Icons.person,
                 size: 48,
-                color: colorScheme.onSurfaceVariant,
+                color: isPending ? Colors.orange : colorScheme.onSurfaceVariant,
               ),
               const SizedBox(height: 16),
               Text(
-                name,
-                style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                empleado.nombre,
+                style:
+                textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 4),
               Text(
-                'Rol: $role',
+                empleado.rol,
                 style: textTheme.bodyMedium,
                 textAlign: TextAlign.center,
               ),
+              if (isPending)
+                Text(
+                  '(Pendiente)',
+                  style: textTheme.bodySmall?.copyWith(color: Colors.orange),
+                )
             ],
           ),
         ),

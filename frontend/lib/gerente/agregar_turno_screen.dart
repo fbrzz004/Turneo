@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:turneo_horarios_app/models/rol.dart';
-import 'package:turneo_horarios_app/models/turno.dart';
+import '../models/rol.dart';
+import '../models/turno.dart';
 
 class AgregarTurnoScreen extends StatefulWidget {
   final Function(Turno) onTurnoCreado;
@@ -17,6 +17,8 @@ class _AgregarTurnoScreenState extends State<AgregarTurnoScreen> {
   final _nombreController = TextEditingController();
   TimeOfDay? _startTime;
   TimeOfDay? _endTime;
+
+  // Lista para manejar el form dinámico
   final List<Map<String, dynamic>> _empleadosRequeridosFields = [
     {'rol': null, 'cantidad': null}
   ];
@@ -37,31 +39,60 @@ class _AgregarTurnoScreenState extends State<AgregarTurnoScreen> {
     }
   }
 
-  void _agregarTurno() {
-    if (_nombreController.text.isNotEmpty &&
-        _startTime != null &&
-        _endTime != null) {
-      final Map<String, int> empleadosRequeridos = {};
-      for (var field in _empleadosRequeridosFields) {
-        if (field['rol'] != null && field['cantidad'] != null) {
-          empleadosRequeridos[field['rol']] = field['cantidad'];
-        }
-      }
-      final nuevoTurno = Turno(
-        nombre: _nombreController.text,
-        horaInicio: _startTime!.format(context),
-        horaFin: _endTime!.format(context),
-        empleadosRequeridos: empleadosRequeridos,
+  void _guardar() {
+    // 1. Validaciones básicas
+    if (_nombreController.text.isEmpty || _startTime == null || _endTime == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Completa nombre y horarios')),
       );
-      widget.onTurnoCreado(nuevoTurno);
-      Navigator.of(context).pop();
+      return;
     }
+
+    // 2. Construir mapa de requerimientos
+    final Map<String, int> empleadosRequeridos = {};
+
+    for (var field in _empleadosRequeridosFields) {
+      final String? rolNombre = field['rol'];
+      final int? cantidad = field['cantidad'];
+
+      if (rolNombre != null && cantidad != null && cantidad > 0) {
+        empleadosRequeridos[rolNombre] = cantidad;
+      }
+    }
+
+    if (empleadosRequeridos.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Agrega al menos un rol con cantidad')),
+      );
+      return;
+    }
+
+    // 3. Crear objeto
+    final nuevoTurno = Turno(
+      nombre: _nombreController.text.trim(),
+      // Usamos context para formatear la hora segun local (AM/PM o 24h)
+      horaInicio: _startTime!.format(context),
+      horaFin: _endTime!.format(context),
+      empleadosRequeridos: empleadosRequeridos,
+    );
+
+    // 4. Callback a la pantalla anterior (que guardará en DB)
+    widget.onTurnoCreado(nuevoTurno);
+    Navigator.of(context).pop();
   }
 
   void _agregarCampoEmpleado() {
     setState(() {
       _empleadosRequeridosFields.add({'rol': null, 'cantidad': null});
     });
+  }
+
+  void _eliminarCampoEmpleado(int index) {
+    if (_empleadosRequeridosFields.length > 1) {
+      setState(() {
+        _empleadosRequeridosFields.removeAt(index);
+      });
+    }
   }
 
   @override
@@ -80,12 +111,6 @@ class _AgregarTurnoScreenState extends State<AgregarTurnoScreen> {
           'Agregar Turno',
           style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () {},
-          ),
-        ],
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
       ),
@@ -96,13 +121,13 @@ class _AgregarTurnoScreenState extends State<AgregarTurnoScreen> {
           children: [
             _buildTextField(
                 controller: _nombreController,
-                labelText: 'Nombre',
+                labelText: 'Nombre del Turno',
                 hintText: 'ej. Turno Mañana'),
             const SizedBox(height: 16),
             _buildTimeField(
               context: context,
               labelText: 'Hora Inicio',
-              hintText: 'ej. 8:00 AM',
+              hintText: '-- : --',
               time: _startTime,
               onTap: () => _selectTime(context, true),
             ),
@@ -110,49 +135,58 @@ class _AgregarTurnoScreenState extends State<AgregarTurnoScreen> {
             _buildTimeField(
               context: context,
               labelText: 'Hora Fin',
-              hintText: 'ej. 12:00 PM',
+              hintText: '-- : --',
               time: _endTime,
               onTap: () => _selectTime(context, false),
             ),
             const SizedBox(height: 24),
+
             Text('Empleados requeridos', style: textTheme.titleLarge),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
+
+            if(widget.roles.isEmpty)
+              Container(
+                padding: const EdgeInsets.all(16),
+                color: Colors.amber.withOpacity(0.2),
+                child: const Text("No tienes Roles creados. Crea roles en la pantalla anterior primero."),
+              ),
+
             ..._empleadosRequeridosFields
                 .asMap()
                 .entries
                 .map((entry) => _buildRequiredEmployeeField(entry.key)),
-            const SizedBox(height: 8),
+
             Align(
               alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: _agregarCampoEmpleado,
-                child: const Text('Agregar más...'),
+              child: TextButton.icon(
+                onPressed: widget.roles.isNotEmpty ? _agregarCampoEmpleado : null,
+                icon: const Icon(Icons.add),
+                label: const Text('Agregar otro rol'),
               ),
             ),
             const SizedBox(height: 32),
+
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: _agregarTurno,
+                    onPressed: widget.roles.isNotEmpty ? _guardar : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: colorScheme.primary,
                       foregroundColor: colorScheme.onPrimary,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: const Text('Aceptar'),
+                    child: const Text('Guardar Turno'),
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colorScheme.error,
-                      foregroundColor: colorScheme.onError,
+                  child: OutlinedButton( // Cambié a Outlined para diseño más limpio
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
+                      side: BorderSide(color: colorScheme.error),
+                      foregroundColor: colorScheme.error,
                     ),
                     child: const Text('Cancelar'),
                   ),
@@ -165,43 +199,32 @@ class _AgregarTurnoScreenState extends State<AgregarTurnoScreen> {
     );
   }
 
-  Widget _buildTextField(
-      {required TextEditingController controller,
-      required String labelText,
-      required String hintText}) {
+  // ... Tus Widgets auxiliares (_buildTextField, _buildTimeField) se mantienen igual ...
+  // Solo asegúrate que _buildRequiredEmployeeField tenga botón de eliminar si quieres UX pro
+
+  Widget _buildTextField({required TextEditingController controller, required String labelText, required String hintText}) {
     return TextField(
       controller: controller,
+      textCapitalization: TextCapitalization.sentences,
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
 
-  Widget _buildTimeField({
-    required BuildContext context,
-    required String labelText,
-    required String hintText,
-    required TimeOfDay? time,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildTimeField({required BuildContext context, required String labelText, required String hintText, required TimeOfDay? time, required VoidCallback onTap}) {
     return InkWell(
       onTap: onTap,
       child: InputDecorator(
         decoration: InputDecoration(
           labelText: labelText,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
         child: Text(
           time?.format(context) ?? hintText,
-          style: time == null
-              ? TextStyle(color: Theme.of(context).hintColor)
-              : null,
+          style: time == null ? TextStyle(color: Theme.of(context).hintColor) : null,
         ),
       ),
     );
@@ -209,25 +232,24 @@ class _AgregarTurnoScreenState extends State<AgregarTurnoScreen> {
 
   Widget _buildRequiredEmployeeField(int index) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
+      padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            flex: 2,
+            flex: 3,
             child: DropdownButtonFormField<String>(
+              isExpanded: true,
               decoration: InputDecoration(
-                labelText: 'Rol',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                  labelText: 'Rol',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16)
               ),
               value: _empleadosRequeridosFields[index]['rol'],
-              items: widget.roles
-                  .map((rol) => DropdownMenuItem(
-                        value: rol.nombre,
-                        child: Text(rol.nombre),
-                      ))
-                  .toList(),
+              items: widget.roles.map((rol) => DropdownMenuItem(
+                value: rol.nombre,
+                child: Text(rol.nombre, overflow: TextOverflow.ellipsis),
+              )).toList(),
               onChanged: (value) {
                 setState(() {
                   _empleadosRequeridosFields[index]['rol'] = value;
@@ -235,16 +257,13 @@ class _AgregarTurnoScreenState extends State<AgregarTurnoScreen> {
               },
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           Expanded(
-            flex: 1,
+            flex: 2,
             child: TextField(
               decoration: InputDecoration(
-                labelText: 'Cantidad',
-                hintText: 'ej. 9',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                labelText: 'Cant.',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
               keyboardType: TextInputType.number,
               onChanged: (value) {
@@ -255,6 +274,11 @@ class _AgregarTurnoScreenState extends State<AgregarTurnoScreen> {
               },
             ),
           ),
+          if (_empleadosRequeridosFields.length > 1)
+            IconButton(
+              icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+              onPressed: () => _eliminarCampoEmpleado(index),
+            )
         ],
       ),
     );
