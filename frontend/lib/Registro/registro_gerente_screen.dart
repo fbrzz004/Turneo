@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'login_gerente_screen.dart'; // Importamos para el link de "Inicia Sesión"
+import '../Login/login_gerente_screen.dart'; // Importamos para el link de "Inicia Sesión"
 
 class RegistroGerenteScreen extends StatelessWidget {
   const RegistroGerenteScreen({super.key});

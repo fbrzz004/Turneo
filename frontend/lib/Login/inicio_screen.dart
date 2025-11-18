@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'login_gerente_screen.dart';
-import 'registro_gerente_screen.dart';
+import '../Registro/registro_gerente_screen.dart';
 import 'login_empleado_screen.dart';
 
 class InicioScreen extends StatelessWidget {

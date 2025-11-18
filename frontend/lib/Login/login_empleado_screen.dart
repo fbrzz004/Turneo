@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'turnos_screen.dart';
+import 'package:turneo_horarios_app/Empleado/turnos_screen.dart';
 
-class RegistroEmpleadoScreen extends StatelessWidget {
-  const RegistroEmpleadoScreen({super.key});
+class LoginEmpleadoScreen extends StatelessWidget {
+  const LoginEmpleadoScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,9 +16,9 @@ class RegistroEmpleadoScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      extendBodyBehindAppBar: true, 
+      extendBodyBehindAppBar: true,
       
-      // 2. Mismo fondo que las pantallas de login
+      // 2. Mismo fondo que las pantallas anteriores
       backgroundColor: const Color(0xFF3B0B5E),
       
       // 3. Usamos SingleChildScrollView para evitar que el teclado
@@ -30,11 +30,13 @@ class RegistroEmpleadoScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // 4. Título "Regístrate"
+                const SizedBox(height: kToolbarHeight), 
+                
+                // 4. Título "TURNEO" (estilo consistente)
                 Text(
-                  'Regístrate',
+                  'TURNEO',
                   textAlign: TextAlign.center,
-                  style: textTheme.displayMedium?.copyWith(
+                  style: textTheme.displayLarge?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     shadows: [
@@ -46,43 +48,20 @@ class RegistroEmpleadoScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                
-                // 5. Subtítulo "Empleado"
+                const SizedBox(height: 16.0),
+
+                // 5. Subtítulo (CAMBIO DE TEXTO)
                 Text(
-                  'Empleado',
+                  'Ingresa como Empleado',
                   textAlign: TextAlign.center,
-                  style: textTheme.headlineSmall?.copyWith(
-                    color: Colors.white70, // Menos énfasis
+                  style: textTheme.headlineMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 48.0),
 
-                // 6. Formulario (idéntico al de registro de gerente)
-                
-                // --- Nombre Completo ---
-                Text(
-                  'Nombre completo:',
-                  style: textTheme.bodyLarge?.copyWith(color: Colors.white),
-                ),
-                const SizedBox(height: 8.0),
-                TextFormField(
-                  keyboardType: TextInputType.name,
-                  textCapitalization: TextCapitalization.words,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white24,
-                    hintText: 'Tu nombre y apellido',
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24.0),
-
-                // --- Correo ---
+                // 6. Formulario de Correo (Idéntico al de Gerente)
                 Text(
                   'Correo:',
                   style: textTheme.bodyLarge?.copyWith(color: Colors.white),
@@ -90,23 +69,24 @@ class RegistroEmpleadoScreen extends StatelessWidget {
                 const SizedBox(height: 8.0),
                 TextFormField(
                   keyboardType: TextInputType.emailAddress,
-                  style: const TextStyle(color: Colors.white),
+                  autocorrect: false,
+                  style: const TextStyle(color: Colors.white), 
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: Colors.white24,
-                    hintText: 'ejemplo@correo.com',
+                    fillColor: Colors.white24, 
+                    hintText: 'tu.correo@empresa.com',
                     hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
-                      borderSide: BorderSide.none,
+                      borderSide: BorderSide.none, 
                     ),
                   ),
                 ),
                 const SizedBox(height: 24.0),
 
-                // --- Crear Contraseña ---
+                // 7. Formulario de Contraseña (Idéntico al de Gerente)
                 Text(
-                  'Crear contraseña:',
+                  'Contraseña:',
                   style: textTheme.bodyLarge?.copyWith(color: Colors.white),
                 ),
                 const SizedBox(height: 8.0),
@@ -116,29 +96,7 @@ class RegistroEmpleadoScreen extends StatelessWidget {
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white24,
-                    hintText: 'Mínimo 8 caracteres',
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24.0),
-
-                // --- Confirmar Contraseña ---
-                Text(
-                  'Confirmar contraseña:',
-                  style: textTheme.bodyLarge?.copyWith(color: Colors.white),
-                ),
-                const SizedBox(height: 8.0),
-                TextFormField(
-                  obscureText: true,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white24,
-                    hintText: 'Repite tu contraseña',
+                    hintText: '••••••••••••',
                     hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
@@ -148,13 +106,13 @@ class RegistroEmpleadoScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 48.0),
 
-                // 7. Botón de Crear Cuenta
+                // 8. Botón de Iniciar Sesión
                 FilledButton(
                   onPressed: () {
                     Navigator.push(
                       context, 
-                      MaterialPageRoute(builder: (context) => const TurnosScreen()),
-                      );
+                    MaterialPageRoute(builder: (context) => const TurnosScreen()),
+                    );
                   },
                   style: FilledButton.styleFrom(
                     backgroundColor: colorScheme.primary,
@@ -162,9 +120,18 @@ class RegistroEmpleadoScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
                     textStyle: textTheme.titleMedium,
                   ),
-                  child: const Text('Crear cuenta'),
+                  child: const Text('Iniciar Sesión'),
                 ),
-                
+                const SizedBox(height: 32.0), // Espacio antes del texto final
+
+                // 9. Texto informativo (CAMBIO DE TEXTO)
+                Text(
+                  'Solo los Gerentes pueden crear cuentas de Empleados.',
+                  textAlign: TextAlign.center,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: Colors.white70, // Color más sutil
+                  ),
+                ),
               ],
             ),
           ),
