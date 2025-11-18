@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'login_gerente_screen.dart';
 import 'registro_gerente_screen.dart';
+import 'login_empleado_screen.dart';
 
 class InicioScreen extends StatelessWidget {
   const InicioScreen({super.key});
@@ -78,6 +79,10 @@ class InicioScreen extends StatelessWidget {
               // Usamos el mismo estilo para consistencia
               FilledButton(
                 onPressed: () {
+                  Navigator.push(
+                    context, 
+                    MaterialPageRoute(builder: (context) => const LoginEmpleadoScreen()),
+                    );
                 },
                 style: FilledButton.styleFrom(
                   backgroundColor: colorScheme.secondaryContainer,
