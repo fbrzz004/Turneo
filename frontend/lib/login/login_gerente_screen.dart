@@ -1,8 +1,83 @@
 import 'package:flutter/material.dart';
-import '/gerente/gerente_main_screen.dart';
+import '../services/gerente_service.dart';
+import '../gerente/gerente_main_screen.dart';
 
-class LoginGerenteScreen extends StatelessWidget {
+class LoginGerenteScreen extends StatefulWidget {
   const LoginGerenteScreen({super.key});
+
+  @override
+  State<LoginGerenteScreen> createState() => _LoginGerenteScreenState();
+}
+
+class _LoginGerenteScreenState extends State<LoginGerenteScreen> {
+  // 1. Controladores
+  final _correoController = TextEditingController();
+  final _contrasenaController = TextEditingController();
+
+  // 2. Servicio
+  final _gerenteService = GerenteService();
+
+  // 3. Estado de carga (opcional para mejor UX)
+  bool _isLoading = false;
+
+  // Función de Login
+  Future<void> _iniciarSesion() async {
+    // Validacion simple de campos vacios
+    if (_correoController.text.isEmpty || _contrasenaController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor llena todos los campos')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Llamada a SQLite
+      final gerente = await _gerenteService.login(
+        _correoController.text.trim(),
+        _contrasenaController.text.trim(),
+      );
+
+      if (!mounted) return;
+
+      if (gerente != null) {
+        // ¡LOGIN EXITOSO!
+        // Aquí podrías guardar la sesión en SharedPreferences si quisieras
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const GerenteMainScreen()),
+        );
+      } else {
+        // LOGIN FALLIDO
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Credenciales incorrectas'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error de base de datos: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _correoController.dispose();
+    _contrasenaController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,11 +88,10 @@ class LoginGerenteScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       extendBodyBehindAppBar: true,
-      
       backgroundColor: const Color(0xFF3B0B5E),
-      
       body: SingleChildScrollView(
         child: SafeArea(
           child: Padding(
@@ -25,8 +99,7 @@ class LoginGerenteScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: kToolbarHeight), 
-                
+                const SizedBox(height: kToolbarHeight),
                 Text(
                   'TURNEO',
                   textAlign: TextAlign.center,
@@ -43,7 +116,6 @@ class LoginGerenteScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16.0),
-
                 Text(
                   'Ingresa como Gerente',
                   textAlign: TextAlign.center,
@@ -54,34 +126,34 @@ class LoginGerenteScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 48.0),
 
-                Text(
-                  'Correo:',
-                  style: textTheme.bodyLarge?.copyWith(color: Colors.white),
-                ),
+                // --- Correo ---
+                Text('Correo:',
+                    style: textTheme.bodyLarge?.copyWith(color: Colors.white)),
                 const SizedBox(height: 8.0),
                 TextFormField(
+                  controller: _correoController,
                   keyboardType: TextInputType.emailAddress,
                   autocorrect: false,
-                  style: const TextStyle(color: Colors.white), 
+                  style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: Colors.white24, 
+                    fillColor: Colors.white24,
                     hintText: 'ejemplo@correo.com',
                     hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
-                      borderSide: BorderSide.none, 
+                      borderSide: BorderSide.none,
                     ),
                   ),
                 ),
                 const SizedBox(height: 24.0),
 
-                Text(
-                  'Contraseña:',
-                  style: textTheme.bodyLarge?.copyWith(color: Colors.white),
-                ),
+                // --- Contraseña ---
+                Text('Contraseña:',
+                    style: textTheme.bodyLarge?.copyWith(color: Colors.white)),
                 const SizedBox(height: 8.0),
                 TextFormField(
+                  controller: _contrasenaController,
                   obscureText: true,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
@@ -97,20 +169,25 @@ class LoginGerenteScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 48.0),
 
+                // Botón Iniciar Sesión
                 FilledButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => const GerenteMainScreen()),
-                    );
-                  },
+                  onPressed: _isLoading
+                      ? null
+                      : _iniciarSesion, // Deshabilita si está cargando
                   style: FilledButton.styleFrom(
                     backgroundColor: colorScheme.primary,
                     foregroundColor: colorScheme.onPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
                     textStyle: textTheme.titleMedium,
                   ),
-                  child: const Text('Iniciar Sesión'),
+                  child: _isLoading
+                      ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                        color: Colors.white, strokeWidth: 2),
+                  )
+                      : const Text('Iniciar Sesión'),
                 ),
               ],
             ),
