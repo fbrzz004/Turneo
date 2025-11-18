@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../gerente_main_screen.dart';
+import '/gerente/gerente_main_screen.dart';
 
 class LoginGerenteScreen extends StatelessWidget {
   const LoginGerenteScreen({super.key});

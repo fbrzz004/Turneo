@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:turneo_horarios_app/agregar_turno_screen.dart';
-import 'package:turneo_horarios_app/descripcion_turno_screen.dart';
+import 'package:turneo_horarios_app/gerente/agregar_turno_screen.dart';
+import 'package:turneo_horarios_app/gerente/descripcion_turno_screen.dart';
 import 'package:turneo_horarios_app/models/rol.dart';
 import 'package:turneo_horarios_app/models/turno.dart';
 

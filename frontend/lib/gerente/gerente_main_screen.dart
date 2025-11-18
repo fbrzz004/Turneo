@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'empleados_screen.dart';
 import 'mis_calendarios_screen.dart';
-import 'crear_calendario/crear_calendario_screen.dart';
+import '/crear_calendario/crear_calendario_screen.dart';
 import 'roles_screen.dart';
 
 class GerenteMainScreen extends StatefulWidget {
