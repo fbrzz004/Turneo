@@ -1,20 +1,7 @@
 import 'package:flutter/material.dart';
 import 'empleados_screen.dart';
 import 'calendario_screen.dart';
-
-// Por ahora, una pantalla de placeholder para 'Roles'
-class RolesScreen extends StatelessWidget {
-  const RolesScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text('Pantalla de Roles'),
-      ),
-    );
-  }
-}
+import 'roles_screen.dart';
 
 class GerenteMainScreen extends StatefulWidget {
   const GerenteMainScreen({super.key});
