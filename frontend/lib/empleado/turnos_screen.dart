@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'calendario_screen.dart';
+import 'gerente_main_screen.dart';
 
 class TurnosScreen extends StatefulWidget {
   const TurnosScreen({super.key});
@@ -71,11 +71,12 @@ class _TurnosScreenState extends State<TurnosScreen> {
         selectedIndex: _selectedIndex,
         onDestinationSelected: (int index) {
           if (index == 1){
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
-              PageRouteBuilder(pageBuilder: (context, anim1, anim2) => const CalendarioScreen(),
-              transitionDuration:  Duration.zero,
-              reverseTransitionDuration: Duration.zero,
+              PageRouteBuilder(
+                pageBuilder: (context, anim1, anim2) => const GerenteMainScreen(),
+                transitionDuration: Duration.zero,
+                reverseTransitionDuration: Duration.zero,
               ),
             );
           } else {
@@ -153,7 +154,7 @@ class _TurnosScreenState extends State<TurnosScreen> {
                         Navigator.pushReplacement(
                           context,
                           PageRouteBuilder(
-                            pageBuilder: (context, anim1, anim2) => const CalendarioScreen(),
+                            pageBuilder: (context, anim1, anim2) => const GerenteMainScreen(),
                             transitionDuration: Duration.zero,
                             reverseTransitionDuration: Duration.zero,
                           ),
