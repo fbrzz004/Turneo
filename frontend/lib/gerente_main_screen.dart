@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'empleados_screen.dart';
-import 'calendario_screen.dart';
+import 'mis_calendarios_screen.dart';
 
 // Por ahora, una pantalla de placeholder para 'Roles'
 class RolesScreen extends StatelessWidget {
@@ -30,7 +30,7 @@ class _GerenteMainScreenState extends State<GerenteMainScreen> {
     // La primera pestaña será la lista de empleados
     EmpleadosScreen(),
     // La segunda es el calendario que ya existía
-    CalendarioScreen(),
+    MisCalendariosScreen(),
     // La tercera es un placeholder por ahora
     RolesScreen(),
   ];
