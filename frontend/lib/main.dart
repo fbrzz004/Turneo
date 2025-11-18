@@ -14,18 +14,11 @@ class TurneoApp extends StatelessWidget {
       title: 'Turneo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        // 1. Esta es la activación clave de Material 3
         useMaterial3: true,
-        
-        // 2. Usamos un tema oscuro como en el mockup
-        brightness: Brightness.dark,
-        
-        // 3. Creamos la paleta de colores de M3 a partir de un color "semilla"
-        // Flutter generará automáticamente los colores primario, secundario,
-        // de fondo, etc., de forma armónica.
+        brightness: Brightness.light,
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.deepPurple,
-          brightness: Brightness.dark,
+          brightness: Brightness.light,
         ),
       ),
       home: const InicioScreen(),
