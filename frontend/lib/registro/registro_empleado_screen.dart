@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../Empleado/turnos_screen.dart';
+import '../empleado/turnos_screen.dart';
 
 class RegistroEmpleadoScreen extends StatelessWidget {
   const RegistroEmpleadoScreen({super.key});
@@ -49,7 +49,7 @@ class RegistroEmpleadoScreen extends StatelessWidget {
                 
                 // 5. Subtítulo "Empleado"
                 Text(
-                  'Empleado',
+                  'empleado',
                   textAlign: TextAlign.center,
                   style: textTheme.headlineSmall?.copyWith(
                     color: Colors.white70, // Menos énfasis

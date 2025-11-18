@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'login_gerente_screen.dart';
-import '../Registro/registro_gerente_screen.dart';
+import '../registro/registro_gerente_screen.dart';
 import 'login_empleado_screen.dart';
 
 class InicioScreen extends StatelessWidget {
@@ -90,7 +90,7 @@ class InicioScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   textStyle: textTheme.titleMedium,
                 ),
-                child: const Text('Empleado'),
+                child: const Text('empleado'),
               ),
               const SizedBox(height: 48.0),
 

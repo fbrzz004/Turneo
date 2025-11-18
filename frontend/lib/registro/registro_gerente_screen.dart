@@ -1,6 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import '../Login/login_gerente_screen.dart'; // Importamos para el link de "Inicia Sesión"
+import '../login/login_gerente_screen.dart';
+import '../models/gerente.dart';
+import '../services/gerente_service.dart';
 
 class RegistroGerenteScreen extends StatelessWidget {
   const RegistroGerenteScreen({super.key});
@@ -19,10 +21,10 @@ class RegistroGerenteScreen extends StatelessWidget {
         elevation: 0,
       ),
       extendBodyBehindAppBar: true, // El fondo se extiende detrás del AppBar
-      
+
       // 2. Mismo fondo que las pantallas anteriores
       backgroundColor: const Color(0xFF3B0B5E),
-      
+
       // 3. Usamos SingleChildScrollView para evitar que el teclado
       // cause un "overflow".
       body: SingleChildScrollView(
@@ -49,7 +51,7 @@ class RegistroGerenteScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                
+
                 // 5. Subtítulo "Gerente"
                 Text(
                   'Gerente',
@@ -153,7 +155,7 @@ class RegistroGerenteScreen extends StatelessWidget {
                 // 7. Botón de Crear Cuenta
                 FilledButton(
                   onPressed: () {
-                    
+
                   },
                   style: FilledButton.styleFrom(
                     backgroundColor: colorScheme.primary,

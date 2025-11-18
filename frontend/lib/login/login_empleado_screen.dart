@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:turneo_horarios_app/Empleado/turnos_screen.dart';
+import 'package:turneo_horarios_app/empleado/turnos_screen.dart';
 
 class LoginEmpleadoScreen extends StatelessWidget {
   const LoginEmpleadoScreen({super.key});
@@ -52,7 +52,7 @@ class LoginEmpleadoScreen extends StatelessWidget {
 
                 // 5. Subtítulo (CAMBIO DE TEXTO)
                 Text(
-                  'Ingresa como Empleado',
+                  'Ingresa como empleado',
                   textAlign: TextAlign.center,
                   style: textTheme.headlineMedium?.copyWith(
                     color: Colors.white,
