@@ -1,4 +1,4 @@
-import 'package.flutter/material.dart';
+import 'package:flutter/material.dart';
 
 class Paso3 extends StatelessWidget {
   const Paso3({super.key});
