@@ -14,7 +14,7 @@ class _TurnosScreenState extends State<TurnosScreen> {
   
   // 1. ¡NUEVA VARIABLE! Cámbiala a 'true' para ver la lista
   // y a 'false' para ver el estado vacío (tu nuevo mockup).
-  final bool _hayTurnosDisponibles = false; 
+  final bool _hayTurnosDisponibles = true; 
 
   // 2. Estado para la barra de navegación
   int _selectedIndex = 0; // "Turnos" es el índice 0
