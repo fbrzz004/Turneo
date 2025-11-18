@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import '../gerente_main_screen.dart';
+import '/gerente/gerente_main_screen.dart';
 
 class TurnosScreen extends StatefulWidget {
   const TurnosScreen({super.key});

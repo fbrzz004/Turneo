@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'crear_calendario/crear_calendario_screen.dart';
+import '../crear_calendario/crear_calendario_screen.dart';
 import 'ver_calendario_screen.dart';
 
 class MisCalendariosScreen extends StatelessWidget {
