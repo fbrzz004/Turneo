@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'gerente_main_screen.dart';
+import '../gerente_main_screen.dart';
 
 class TurnosScreen extends StatefulWidget {
   const TurnosScreen({super.key});
@@ -10,22 +10,15 @@ class TurnosScreen extends StatefulWidget {
 }
 
 class _TurnosScreenState extends State<TurnosScreen> {
-  // --- ESTADO ---
-  
-  // 1. ¡NUEVA VARIABLE! Cámbiala a 'true' para ver la lista
-  // y a 'false' para ver el estado vacío (tu nuevo mockup).
   final bool _hayTurnosDisponibles = true; 
 
-  // 2. Estado para la barra de navegación
-  int _selectedIndex = 0; // "Turnos" es el índice 0
+  int _selectedIndex = 0;
 
-  // 3. Estado para los checkboxes
   bool _lunesManana = true;
   bool _lunesTarde = true;
   bool _lunesNoche = true;
 
   
-  // --- WIDGETS ---
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -33,11 +26,9 @@ class _TurnosScreenState extends State<TurnosScreen> {
     return Scaffold(
       backgroundColor: colorScheme.surface,
       
-      // 1. AppBar (ACTUALIZADO: Título movido aquí)
       appBar: AppBar(
         backgroundColor: colorScheme.surface,
         elevation: 0,
-        // Título ahora en el AppBar para consistencia
         title: Text(
           'Turnos Disponibles',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -60,13 +51,10 @@ class _TurnosScreenState extends State<TurnosScreen> {
         ],
       ),
       
-      // 2. Cuerpo (¡NUEVA LÓGICA CONDICIONAL!)
-      // Decide qué widget mostrar basado en si hay turnos
       body: _hayTurnosDisponibles
-          ? _buildListaDeTurnos(context) // Muestra la lista
-          : _buildEstadoVacio(context),   // Muestra el mensaje de "vacío"
+          ? _buildListaDeTurnos(context)
+          : _buildEstadoVacio(context),
       
-      // 3. Barra de Navegación Inferior (sin cambios)
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (int index) {
@@ -101,7 +89,6 @@ class _TurnosScreenState extends State<TurnosScreen> {
     );
   }
 
-  // --- WIDGET PARA ESTADO VACÍO (¡NUEVO!) ---
   Widget _buildEstadoVacio(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
@@ -112,15 +99,13 @@ class _TurnosScreenState extends State<TurnosScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Icono de engranaje/procesando
             Icon(
-              Icons.settings_outlined, // Puedes cambiarlo por Icons.sync o similar
+              Icons.settings_outlined,
               size: 48.0,
               color: colorScheme.primary,
             ),
             const SizedBox(height: 24.0),
 
-            // Texto principal
             Text(
               'No tienes ningún turno disponible para contestar.',
               textAlign: TextAlign.center,
@@ -131,7 +116,6 @@ class _TurnosScreenState extends State<TurnosScreen> {
             ),
             const SizedBox(height: 16.0),
 
-            // Texto secundario con link clicable
             RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
@@ -144,13 +128,11 @@ class _TurnosScreenState extends State<TurnosScreen> {
                     text: 'Calendario',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: colorScheme.primary, // Color de link
+                      color: colorScheme.primary,
                       decoration: TextDecoration.underline,
                     ),
-                    // Permite que esta parte del texto sea clicable
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
-                        // Cambia el índice de la barra de navegación
                         Navigator.pushReplacement(
                           context,
                           PageRouteBuilder(
@@ -171,7 +153,6 @@ class _TurnosScreenState extends State<TurnosScreen> {
     );
   }
 
-  // --- WIDGET PARA LISTA DE TURNOS (REFACTORIZADO) ---
   Widget _buildListaDeTurnos(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
@@ -181,18 +162,14 @@ class _TurnosScreenState extends State<TurnosScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // El Título "Turnos Disponibles" se movió al AppBar
-            
-            // Subtítulo
             Text(
-              'Horario asignado: Lunes a Jueves', // Texto actualizado
+              'Horario asignado: Lunes a Jueves',
               style: textTheme.titleMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 24.0),
 
-            // Paneles de Días
             _buildDiaExpansionTile(
               context: context,
               dia: 'Día Lunes',
@@ -215,7 +192,6 @@ class _TurnosScreenState extends State<TurnosScreen> {
             ),
             const SizedBox(height: 32.0),
 
-            // Botón de Aceptar
             FilledButton(
               onPressed: () {
                 _mostrarDialogoConfirmacion(context);
@@ -233,7 +209,6 @@ class _TurnosScreenState extends State<TurnosScreen> {
     );
   }
 
-  // --- Widget reutilizable para los paneles (sin cambios) ---
   Widget _buildDiaExpansionTile({
     required BuildContext context,
     required String dia,
@@ -299,7 +274,6 @@ class _TurnosScreenState extends State<TurnosScreen> {
     );
   }
 
-  // --- Función para el diálogo (sin cambios) ---
   Future<void> _mostrarDialogoConfirmacion(BuildContext context) {
     return showDialog<void>(
       context: context,
