@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:turneo_horarios_app/turnos_screen.dart';
 
 class LoginEmpleadoScreen extends StatelessWidget {
   const LoginEmpleadoScreen({super.key});
@@ -108,7 +109,10 @@ class LoginEmpleadoScreen extends StatelessWidget {
                 // 8. Botón de Iniciar Sesión
                 FilledButton(
                   onPressed: () {
-                    
+                    Navigator.push(
+                      context, 
+                    MaterialPageRoute(builder: (context) => const TurnosScreen()),
+                    );
                   },
                   style: FilledButton.styleFrom(
                     backgroundColor: colorScheme.primary,
