@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'gerente_main_screen.dart';
 
 class LoginGerenteScreen extends StatelessWidget {
   const LoginGerenteScreen({super.key});
@@ -120,7 +121,10 @@ class LoginGerenteScreen extends StatelessWidget {
                 // con el color primario es la elección correcta.
                 FilledButton(
                   onPressed: () {
-
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const GerenteMainScreen()),
+                    );
                   },
                   style: FilledButton.styleFrom(
                     // Usamos el color primario del tema
