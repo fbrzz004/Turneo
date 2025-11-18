@@ -41,7 +41,7 @@ class RegistroEmpleadoScreen extends StatelessWidget {
                       Shadow(
                         offset: const Offset(2.0, 2.0),
                         blurRadius: 4.0,
-                        color: Colors.black.withOpacity(0.5),
+                        color: Colors.black,
                       ),
                     ],
                   ),
@@ -73,7 +73,7 @@ class RegistroEmpleadoScreen extends StatelessWidget {
                     filled: true,
                     fillColor: Colors.white24,
                     hintText: 'Tu nombre y apellido',
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+                    hintStyle: TextStyle(color: Colors.white),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
                       borderSide: BorderSide.none,
@@ -95,7 +95,7 @@ class RegistroEmpleadoScreen extends StatelessWidget {
                     filled: true,
                     fillColor: Colors.white24,
                     hintText: 'ejemplo@correo.com',
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+                    hintStyle: TextStyle(color: Colors.white),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
                       borderSide: BorderSide.none,
@@ -117,7 +117,7 @@ class RegistroEmpleadoScreen extends StatelessWidget {
                     filled: true,
                     fillColor: Colors.white24,
                     hintText: 'Mínimo 8 caracteres',
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+                    hintStyle: TextStyle(color: Colors.white),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
                       borderSide: BorderSide.none,
@@ -139,7 +139,7 @@ class RegistroEmpleadoScreen extends StatelessWidget {
                     filled: true,
                     fillColor: Colors.white24,
                     hintText: 'Repite tu contraseña',
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+                    hintStyle: TextStyle(color: Colors.white),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
                       borderSide: BorderSide.none,

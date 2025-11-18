@@ -218,7 +218,7 @@ class _TurnosScreenState extends State<TurnosScreen> {
     
     return Card(
       elevation: 0,
-      color: colorScheme.primaryContainer.withOpacity(0.5),
+      color: colorScheme.primaryContainer,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
       ),

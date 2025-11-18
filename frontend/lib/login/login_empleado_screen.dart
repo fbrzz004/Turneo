@@ -43,7 +43,7 @@ class LoginEmpleadoScreen extends StatelessWidget {
                       Shadow(
                         offset: const Offset(2.0, 2.0),
                         blurRadius: 4.0,
-                        color: Colors.black.withOpacity(0.5),
+                        color: Colors.black,
                       ),
                     ],
                   ),
@@ -75,7 +75,7 @@ class LoginEmpleadoScreen extends StatelessWidget {
                     filled: true,
                     fillColor: Colors.white24, 
                     hintText: 'tu.correo@empresa.com',
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+                    hintStyle: TextStyle(color: Colors.white),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
                       borderSide: BorderSide.none, 
@@ -97,7 +97,7 @@ class LoginEmpleadoScreen extends StatelessWidget {
                     filled: true,
                     fillColor: Colors.white24,
                     hintText: '••••••••••••',
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+                    hintStyle: TextStyle(color: Colors.white),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
                       borderSide: BorderSide.none,
