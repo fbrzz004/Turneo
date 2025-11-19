@@ -6,14 +6,22 @@ import '/crear_calendario/crear_calendario_screen.dart';
 import 'roles_screen.dart';
 
 class GerenteMainScreen extends StatefulWidget {
-  const GerenteMainScreen({super.key});
+  final int initialIndex;
+  
+  const GerenteMainScreen({super.key, this.initialIndex = 1});
 
   @override
   State<GerenteMainScreen> createState() => _GerenteMainScreenState();
 }
 
 class _GerenteMainScreenState extends State<GerenteMainScreen> {
-  int _selectedIndex = 1; // Start on the Calendar tab
+  late int _selectedIndex; // Start on the Calendar tab
+
+  @override
+  void initState(){
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   static const List<Widget> _widgetOptions = <Widget>[
     // La primera pestaña será la lista de empleados

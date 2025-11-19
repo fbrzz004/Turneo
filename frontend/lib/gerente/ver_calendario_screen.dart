@@ -1,10 +1,28 @@
 import 'package:flutter/material.dart';
 import './../ajustes/ajustes_screen.dart';
+import './gerente_main_screen.dart';
 
-class VerCalendarioScreen extends StatelessWidget {
+class VerCalendarioScreen extends StatefulWidget {
   final bool isPublished;
 
   const VerCalendarioScreen({super.key, this.isPublished = false});
+
+  @override
+  State<VerCalendarioScreen> createState() => _VerCalendarioScreenState();
+}
+
+class _VerCalendarioScreenState extends State<VerCalendarioScreen> {
+  final int _selectedIndex = 1;
+
+  void _onItemTapped(int index){
+    if (index == _selectedIndex) {
+      return;
+    }
+
+    Navigator.pushAndRemoveUntil(context,
+    MaterialPageRoute(builder: (context) => GerenteMainScreen(initialIndex: index),), (Route<dynamic> route) => false,);
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +61,7 @@ class VerCalendarioScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            if (isPublished)
+            if (widget.isPublished)
               Text(
                 'El calendario fue publicado y visible para los trabajadores seleccionados.',
                 textAlign: TextAlign.center,
@@ -58,7 +76,7 @@ class VerCalendarioScreen extends StatelessWidget {
                 minimumSize: const Size(double.infinity, 50),
               ),
             ),
-            if (!isPublished) ...[
+            if (!widget.isPublished) ...[
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {},
@@ -72,6 +90,28 @@ class VerCalendarioScreen extends StatelessWidget {
             ],
           ],
         ),
+      ),
+      bottomNavigationBar: NavigationBar(
+        onDestinationSelected: _onItemTapped,
+        indicatorColor: Theme.of(context).colorScheme.primaryContainer,
+        selectedIndex: _selectedIndex, // Mantiene seleccionado el ícono de calendario
+        destinations: const <Widget>[
+          NavigationDestination(
+            selectedIcon: Icon(Icons.people),
+            icon: Icon(Icons.people_outline),
+            label: 'Equipo',
+          ),
+          NavigationDestination(
+            selectedIcon: Icon(Icons.calendar_today),
+            icon: Icon(Icons.calendar_today_outlined),
+            label: 'Calendario',
+          ),
+          NavigationDestination(
+            selectedIcon: Icon(Icons.rule_folder),
+            icon: Icon(Icons.rule_folder_outlined),
+            label: 'Turnos',
+          ),
+        ],
       ),
     );
   }
