@@ -6,10 +6,10 @@ import '../services/empleado_service.dart';
 import 'paso_1.dart';
 import 'paso_2.dart';
 import 'paso_3.dart';
-// import 'paso_4.dart'; // Todavía no lo creamos
+import 'paso_4.dart'; // <--- 1. IMPORTANTE: Importar el Paso 4
 
 class CrearCalendarioScreen extends StatefulWidget {
-  final Calendario? calendarioExistente; // Si recibimos esto, es modo "Ver Estado"
+  final Calendario? calendarioExistente;
 
   const CrearCalendarioScreen({super.key, this.calendarioExistente});
 
@@ -22,7 +22,6 @@ class _CrearCalendarioScreenState extends State<CrearCalendarioScreen> {
   final _calendarioService = CalendarioService();
   final _empleadoService = EmpleadoService();
 
-  // Variables Paso 1 y 2
   final TextEditingController nombreController = TextEditingController();
   List<DateTime> fechasSeleccionadas = [];
   List<Empleado> empleadosSeleccionados = [];
@@ -34,11 +33,10 @@ class _CrearCalendarioScreenState extends State<CrearCalendarioScreen> {
     super.initState();
 
     if (widget.calendarioExistente != null) {
-      // MODO VER: Saltamos directo al Paso 3 (índice 2)
+      // MODO VER: Iniciamos en el índice 2 (que corresponde a Paso 3)
       _currentStep = 2;
-      isLoading = false; // No necesitamos cargar empleados para el paso 3
+      isLoading = false;
     } else {
-      // MODO CREAR: Iniciamos normal
       _cargarDatosIniciales();
     }
   }
@@ -51,17 +49,19 @@ class _CrearCalendarioScreenState extends State<CrearCalendarioScreen> {
     });
   }
 
-  // --- NAVEGACIÓN ---
   Future<void> _siguientePaso() async {
     if (_currentStep == 0) {
-      // ... Validaciones Paso 1 ... (igual que antes)
-      if (nombreController.text.isEmpty || fechasSeleccionadas.isEmpty) return;
+      if (nombreController.text.isEmpty || fechasSeleccionadas.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Completa los datos")));
+        return;
+      }
       setState(() => _currentStep++);
     }
     else if (_currentStep == 1) {
-      // ... Validaciones Paso 2 y Guardar ...
-      if (empleadosSeleccionados.isEmpty) return;
-
+      if (empleadosSeleccionados.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Selecciona empleados")));
+        return;
+      }
       try {
         final calId = await _calendarioService.crearCalendario(nombreController.text);
         await _calendarioService.agregarDias(calId, fechasSeleccionadas);
@@ -69,60 +69,64 @@ class _CrearCalendarioScreenState extends State<CrearCalendarioScreen> {
 
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Encuesta enviada")));
-        Navigator.pop(context); // Salimos a la lista principal
+        Navigator.pop(context);
       } catch (e) {
-        // Error handling
+        print(e);
       }
     }
   }
 
+  // --- 2. LÓGICA CORREGIDA PARA IR AL ALGORITMO ---
   void _irAPaso4() {
-    // Lógica para ir al algoritmo (lo veremos luego)
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Yendo al algoritmo... (Próximamente)")));
-    // setState(() => _currentStep++);
+    setState(() {
+      _currentStep = 3; // Avanzamos al índice 3 (Paso 4)
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Si estamos en modo ver existente, usamos ese objeto. Si estamos creando, no hay objeto todavía.
-    final calendarioParaPaso3 = widget.calendarioExistente ??
+    // Objeto seguro para usar en pasos 3 y 4
+    final calendarioActual = widget.calendarioExistente ??
         Calendario(nombre: "Preview", fechaCreacion: DateTime.now(), estado: 0);
-    // ^ Placeholder por si llegara a fallar la lógica, pero en flujo normal al llegar a paso 3 ya se guardó y salió.
 
     final List<Widget> _steps = [
+      // Índice 0
       Paso1(
         nombreController: nombreController,
         fechasSeleccionadas: fechasSeleccionadas,
         onFechasChanged: (f) => setState(() => fechasSeleccionadas = f),
       ),
+      // Índice 1
       Paso2(
         todosLosEmpleados: todosLosEmpleados,
         empleadosSeleccionados: empleadosSeleccionados,
         onSelectionChanged: (s) => setState(() => empleadosSeleccionados = s),
       ),
-      // PASO 3: MONITOREO
+      // Índice 2 (Paso 3)
       Paso3(
-        calendario: calendarioParaPaso3,
-        onGenerarPresionado: _irAPaso4,
+        calendario: calendarioActual,
+        onGenerarPresionado: _irAPaso4, // Conectamos la función
       ),
-      // Paso4(), // Futuro
+      // Índice 3 (Paso 4)
+      Paso4(
+        calendario: calendarioActual,
+      ),
     ];
 
-    // Si estamos viendo un calendario existente, no mostramos el Stepper de arriba ni botones de "Siguiente"
-    // porque la pantalla Paso3 ya tiene sus propios botones.
+    // --- CASO: MODO VER / MONITOREAR (Entrando desde Mis Calendarios) ---
     if (widget.calendarioExistente != null) {
       return Scaffold(
         appBar: AppBar(title: Text(widget.calendarioExistente!.nombre)),
-        body: _steps[2], // Mostramos directamente el Paso 3
+        // 3. CORRECCIÓN CRÍTICA: Usamos _currentStep en lugar de dejarlo fijo en [2]
+        body: _steps[_currentStep],
       );
     }
 
-    // MODO CREACIÓN (Wizard normal)
+    // --- CASO: MODO CREAR (Wizard paso 1 y 2) ---
     return Scaffold(
       appBar: AppBar(title: const Text('Crear Calendario')),
       body: Column(
         children: [
-          // Indicadores (Solo mostramos 1 y 2 para creación)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: Row(
@@ -167,30 +171,10 @@ class _CrearCalendarioScreenState extends State<CrearCalendarioScreen> {
 
   Widget _buildStepIndicator(int index, String label) {
     final isActive = _currentStep >= index;
-    final isCurrent = _currentStep == index;
     final colorScheme = Theme.of(context).colorScheme;
-
-    return Column(
-      children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: isActive ? colorScheme.primary : Colors.grey.shade300,
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Text('${index + 1}',
-                style: TextStyle(color: isActive ? Colors.white : Colors.black54, fontWeight: FontWeight.bold)),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(label, style: TextStyle(
-            fontSize: 12,
-            color: isCurrent ? colorScheme.primary : Colors.grey,
-            fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal
-        ))
-      ],
-    );
+    return Column(children: [
+      Icon(isActive ? Icons.check_circle : Icons.circle_outlined, color: isActive ? colorScheme.primary : Colors.grey),
+      Text(label)
+    ]);
   }
 }
