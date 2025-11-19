@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '/gerente/gerente_main_screen.dart';
+import 'package:turneo_horarios_app/ajustes/ajustes_screen.dart';
 
 class TurnosScreen extends StatefulWidget {
   const TurnosScreen({super.key});
@@ -46,7 +47,13 @@ class _TurnosScreenState extends State<TurnosScreen> {
         actions: [
           IconButton(
             icon: Icon(Icons.settings_outlined, color: colorScheme.onSurface),
-            onPressed: () {  },
+            onPressed: () {
+              Navigator.push(
+                context, 
+                MaterialPageRoute(builder: (context) => const AjustesScreen()
+                ),
+              );
+              },
           ),
         ],
       ),

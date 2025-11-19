@@ -65,17 +65,6 @@ class _EmpleadosScreenState extends State<EmpleadosScreen> {
     final rolesDisponibles = _todosLosEmpleados.map((e) => e.rol).toSet().toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Empleados registrados'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _cargarEmpleados,
-          ),
-        ],
-        backgroundColor: colorScheme.surface,
-        elevation: 0,
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           // Esperamos a que vuelva de la pantalla agregar para recargar

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:turneo_horarios_app/ajustes/ajustes_screen.dart';
 import 'empleados_screen.dart';
 import 'mis_calendarios_screen.dart';
 import '/crear_calendario/crear_calendario_screen.dart';
@@ -42,7 +43,13 @@ class _GerenteMainScreenState extends State<GerenteMainScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context, 
+                MaterialPageRoute(builder: (context) => const AjustesScreen()
+                ),
+              );
+            },
           ),
         ],
       ),

@@ -44,6 +44,7 @@ class _AgregarTurnoScreenState extends State<AgregarTurnoScreen> {
     if (_nombreController.text.isEmpty || _startTime == null || _endTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Completa nombre y horarios')),
+        
       );
       return;
     }

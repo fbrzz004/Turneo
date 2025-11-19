@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:turneo_horarios_app/models/turno.dart';
+import 'package:turneo_horarios_app/ajustes/ajustes_screen.dart';
 
 class DescripcionTurnoScreen extends StatelessWidget {
   final Turno turno;
@@ -25,7 +26,13 @@ class DescripcionTurnoScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context, 
+                MaterialPageRoute(builder: (context) => const AjustesScreen()
+                ),
+              );
+            },
           ),
         ],
         backgroundColor: theme.scaffoldBackgroundColor,
