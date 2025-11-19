@@ -80,15 +80,19 @@ class _VerCalendarioScreenState extends State<VerCalendarioScreen> {
         int diaId = d['id'] as int;
         int turnoId = t['id'] as int;
 
-        // Buscar empleados asignados a este cruce
         var empleadosEnTurno = asignaciones.where((a) =>
         a['calendario_dia_id'] == diaId && a['turno_id'] == turnoId);
 
         if (empleadosEnTurno.isEmpty) {
           celdas.add("-");
         } else {
-          // Crear string con saltos de línea: "Juan\nPedro"
-          celdas.add(empleadosEnTurno.map((e) => e['nombre']).join('\n'));
+          final nombresUnicos = empleadosEnTurno
+              .map((e) => e['nombre'].toString())
+              .toSet() // Esto elimina los repetidos
+              .toList();
+
+          // Unimos con salto de línea
+          celdas.add(nombresUnicos.join('\n'));
         }
       }
       fila['celdas'] = celdas;
@@ -202,6 +206,7 @@ class _VerCalendarioScreenState extends State<VerCalendarioScreen> {
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: DataTable(
+                      dataRowMaxHeight: double.infinity,
                       headingRowColor: MaterialStateProperty.all(colorScheme.primaryContainer),
                       columns: [
                         const DataColumn(label: Text("TURNO", style: TextStyle(fontWeight: FontWeight.bold))),

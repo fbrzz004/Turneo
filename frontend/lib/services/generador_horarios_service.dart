@@ -83,7 +83,13 @@ class GeneradorHorariosService {
       var candidatos = disponibilidadesRaw.where((disp) {
         bool mismoRol = disp['rol'] == rolNecesario;
         bool disponible = disp['calendario_dia_id'] == diaId && disp['turno_id'] == turnoId;
-        return mismoRol && disponible;
+        bool yaEstaEnEsteTurno = asignacionesFinales.any((asig) =>
+        asig['calendario_dia_id'] == diaId &&
+            asig['turno_id'] == turnoId &&
+            asig['empleado_id'] == disp['empleado_id']
+        );
+
+        return mismoRol && disponible && !yaEstaEnEsteTurno;
       }).toList();
 
       // Filtrar restricciones (Max turnos por día)
