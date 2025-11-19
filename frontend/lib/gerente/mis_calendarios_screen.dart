@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import '../services/calendario_service.dart';
 import '../models/calendario.dart';
 import '../crear_calendario/crear_calendario_screen.dart';
-// import 'ver_resultados_calendario.dart'; // Futuro
+import 'ver_calendario_screen.dart';
 
 class MisCalendariosScreen extends StatefulWidget {
   const MisCalendariosScreen({super.key});
@@ -23,7 +23,6 @@ class _MisCalendariosScreenState extends State<MisCalendariosScreen> {
     _cargarCalendarios();
   }
 
-  // Método público para refrescar (puede ser llamado desde el padre si es necesario)
   Future<void> _cargarCalendarios() async {
     final lista = await _calendarioService.listarCalendarios();
     if (mounted) {
@@ -58,7 +57,7 @@ class _MisCalendariosScreenState extends State<MisCalendariosScreen> {
         itemCount: _calendarios.length,
         itemBuilder: (context, index) {
           final cal = _calendarios[index];
-          final esCompletado = cal.estado == 1;
+          final esCompletado = cal.estado == 1; // 1 = Publicado
 
           return _buildCalendarItem(
             context,
@@ -78,17 +77,25 @@ class _MisCalendariosScreenState extends State<MisCalendariosScreen> {
     return GestureDetector(
       onTap: () {
         if (cal.estado == 0) {
-          // SI ESTÁ EN ESPERA -> Ir al monitor (Paso 3)
+          // CASO A: EN ESPERA -> Vamos al flujo de creación (Paso 3)
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => CrearCalendarioScreen(calendarioExistente: cal),
             ),
-          ).then((_) => _cargarCalendarios()); // Al volver, recargar lista
+          ).then((_) => _cargarCalendarios());
         } else {
-          // SI ESTÁ COMPLETADO -> Ir a ver resultados (Futuro)
-          /* Navigator.push(context, MaterialPageRoute(
-               builder: (context) => VerResultadosScreen(calendario: cal))); */
+          // CASO B: COMPLETADO -> Vamos a VerCalendarioScreen (Modo Solo Lectura)
+          // ¡AQUÍ ESTÁ EL CAMBIO! Usamos la misma pantalla.
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VerCalendarioScreen(
+                  calendario: cal,
+                  isPublished: true // <--- Esto oculta el botón de publicar
+              ),
+            ),
+          );
         }
       },
       child: Container(

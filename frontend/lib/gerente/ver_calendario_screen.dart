@@ -106,17 +106,23 @@ class _VerCalendarioScreenState extends State<VerCalendarioScreen> {
 
   Future<void> _publicarCalendario() async {
     final db = await AppDatabase.instance.database;
-    // Cambiar estado a 1 (Completado/Publicado)
+
+    // 1. Cambiar estado en BD
     await db.update('calendario', {'estado': 1},
         where: 'id = ?', whereArgs: [widget.calendario.id]);
 
-    setState(() {
-      _publicadoLocalmente = true;
-    });
-
+    // 2. Feedback visual
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("¡Calendario Publicado! Ahora los empleados pueden verlo."), backgroundColor: Colors.green)
+        const SnackBar(
+          content: Text("¡Calendario Publicado con éxito!"),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        )
     );
+
+    // 3. NAVEGACIÓN INTELIGENTE
+    Navigator.pop(context, true);
   }
 
   // --- GENERACIÓN DE PDF ---
