@@ -91,4 +91,49 @@ class CalendarioService {
 
     return result.isNotEmpty;
   }
+
+  Future<bool> esInvitado(int calendarioId, int empleadoId) async {
+    final db = await AppDatabase.instance.database;
+    final result = await db.query('calendario_participante',
+        where: 'calendario_id = ? AND empleado_id = ?',
+        whereArgs: [calendarioId, empleadoId]);
+    return result.isNotEmpty;
+  }
+
+  // Obtener lista de participantes con su estado (Para el Paso 3 del Gerente)
+  Future<List<Map<String, dynamic>>> obtenerParticipantesConEstado(int calendarioId) async {
+    final db = await AppDatabase.instance.database;
+
+    // 1. Obtener los empleados invitados
+    final participantes = await db.rawQuery('''
+      SELECT e.id, e.nombre, e.rol 
+      FROM empleado e
+      JOIN calendario_participante cp ON e.id = cp.empleado_id
+      WHERE cp.calendario_id = ?
+    ''', [calendarioId]);
+
+    List<Map<String, dynamic>> resultado = [];
+
+    // 2. Verificar disponibilidad para cada uno
+    for (var part in participantes) {
+      final empId = part['id'] as int;
+
+      // Verificamos si existe al menos un registro en disponibilidad para este calendario y empleado
+      final tieneRespuesta = await db.rawQuery('''
+        SELECT d.id FROM disponibilidad d
+        JOIN calendario_dia cd ON d.calendario_dia_id = cd.id
+        WHERE cd.calendario_id = ? AND d.empleado_id = ?
+        LIMIT 1
+      ''', [calendarioId, empId]);
+
+      resultado.add({
+        'id': empId,
+        'nombre': part['nombre'],
+        'rol': part['rol'],
+        'respondio': tieneRespuesta.isNotEmpty, // True o False
+      });
+    }
+
+    return resultado;
+  }
 }

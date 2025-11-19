@@ -1,38 +1,98 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../services/calendario_service.dart';
+import '../models/calendario.dart';
 import '../crear_calendario/crear_calendario_screen.dart';
-import 'ver_calendario_screen.dart';
+// import 'ver_resultados_calendario.dart'; // Futuro
 
-class MisCalendariosScreen extends StatelessWidget {
+class MisCalendariosScreen extends StatefulWidget {
   const MisCalendariosScreen({super.key});
 
   @override
+  State<MisCalendariosScreen> createState() => _MisCalendariosScreenState();
+}
+
+class _MisCalendariosScreenState extends State<MisCalendariosScreen> {
+  final _calendarioService = CalendarioService();
+  List<Calendario> _calendarios = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarCalendarios();
+  }
+
+  // Método público para refrescar (puede ser llamado desde el padre si es necesario)
+  Future<void> _cargarCalendarios() async {
+    final lista = await _calendarioService.listarCalendarios();
+    if (mounted) {
+      setState(() {
+        _calendarios = lista;
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: ListView(
-        children: [
-          _buildCalendarItem(context, "1", "Calendario 1", "En Espera", const Color(0xFFFDE047), false),
-          const SizedBox(height: 16),
-          _buildCalendarItem(context, "2", "Calendario 2", "Completado", const Color(0xFF86EFAC), true),
-          const SizedBox(height: 16),
-          _buildCalendarItem(context, "3", "Calendario 3", "Completado", const Color(0xFF86EFAC), true),
-        ],
+    if (_isLoading) return const Center(child: CircularProgressIndicator());
+
+    if (_calendarios.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.calendar_today, size: 60, color: Colors.grey),
+            SizedBox(height: 16),
+            Text("No has creado calendarios aún."),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _cargarCalendarios,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16.0),
+        itemCount: _calendarios.length,
+        itemBuilder: (context, index) {
+          final cal = _calendarios[index];
+          final esCompletado = cal.estado == 1;
+
+          return _buildCalendarItem(
+            context,
+            cal,
+            esCompletado ? "Completado" : "En Espera",
+            esCompletado ? const Color(0xFF86EFAC) : const Color(0xFFFDE047),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildCalendarItem(BuildContext context, String number, String title, String status, Color statusColor, bool isPublished) {
+  Widget _buildCalendarItem(BuildContext context, Calendario cal, String statusLabel, Color statusColor) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => VerCalendarioScreen(isPublished: isPublished)),
-        );
+        if (cal.estado == 0) {
+          // SI ESTÁ EN ESPERA -> Ir al monitor (Paso 3)
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CrearCalendarioScreen(calendarioExistente: cal),
+            ),
+          ).then((_) => _cargarCalendarios()); // Al volver, recargar lista
+        } else {
+          // SI ESTÁ COMPLETADO -> Ir a ver resultados (Futuro)
+          /* Navigator.push(context, MaterialPageRoute(
+               builder: (context) => VerResultadosScreen(calendario: cal))); */
+        }
       },
       child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
           color: colorScheme.surfaceVariant,
@@ -43,21 +103,33 @@ class MisCalendariosScreen extends StatelessWidget {
             CircleAvatar(
               backgroundColor: colorScheme.primary,
               foregroundColor: colorScheme.onPrimary,
-              child: Text(number),
+              child: Text("${cal.id}"),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: Text(title, style: textTheme.titleMedium),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(cal.nombre, style: textTheme.titleMedium),
+                  Text(
+                    DateFormat('dd/MM/yyyy').format(cal.fechaCreacion),
+                    style: textTheme.bodySmall,
+                  ),
+                ],
+              ),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: statusColor.withOpacity(0.2),
+                color: statusColor.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                status,
-                style: textTheme.bodyMedium?.copyWith(color: statusColor.computeLuminance() > 0.5 ? Colors.black : Colors.white),
+                statusLabel,
+                style: textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87
+                ),
               ),
             ),
           ],
