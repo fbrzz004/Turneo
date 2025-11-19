@@ -76,7 +76,6 @@ class _AgregarEmpleadoScreenState extends State<AgregarEmpleadoScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Agregar Empleado'),
         backgroundColor: colorScheme.surface,
         elevation: 0,
       ),

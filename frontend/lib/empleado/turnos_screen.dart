@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import '/gerente/gerente_main_screen.dart';
+import './../empleado/ver_calendario_empleado_screen.dart';
 import 'package:turneo_horarios_app/ajustes/ajustes_screen.dart';
 
 class TurnosScreen extends StatefulWidget {
@@ -30,18 +30,11 @@ class _TurnosScreenState extends State<TurnosScreen> {
       appBar: AppBar(
         backgroundColor: colorScheme.surface,
         elevation: 0,
+        automaticallyImplyLeading: false,
         title: Text(
           'Turnos Disponibles',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
-          ),
-        ),
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: CircleAvatar(
-            backgroundColor: colorScheme.primaryContainer,
-            foregroundColor: colorScheme.onPrimaryContainer,
-            child: const Icon(Icons.person_outline), 
           ),
         ),
         actions: [
@@ -69,7 +62,7 @@ class _TurnosScreenState extends State<TurnosScreen> {
             Navigator.pushReplacement(
               context,
               PageRouteBuilder(
-                pageBuilder: (context, anim1, anim2) => const GerenteMainScreen(),
+                pageBuilder: (context, anim1, anim2) => const VerCalendarioEmpleadoScreen(),
                 transitionDuration: Duration.zero,
                 reverseTransitionDuration: Duration.zero,
               ),
@@ -143,7 +136,7 @@ class _TurnosScreenState extends State<TurnosScreen> {
                         Navigator.pushReplacement(
                           context,
                           PageRouteBuilder(
-                            pageBuilder: (context, anim1, anim2) => const GerenteMainScreen(),
+                            pageBuilder: (context, anim1, anim2) => const VerCalendarioEmpleadoScreen(),
                             transitionDuration: Duration.zero,
                             reverseTransitionDuration: Duration.zero,
                           ),

@@ -36,8 +36,9 @@ class _GerenteMainScreenState extends State<GerenteMainScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(
-          _selectedIndex == 1 ? 'Mis Calendarios' : _selectedIndex == 0 ? 'Equipo' : 'Roles',
+          _selectedIndex == 1 ? 'Mis Calendarios' : _selectedIndex == 0 ? 'Equipo' : 'Turnos y Roles',
           style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         actions: [
@@ -85,7 +86,7 @@ class _GerenteMainScreenState extends State<GerenteMainScreen> {
           NavigationDestination(
             selectedIcon: Icon(Icons.rule_folder),
             icon: Icon(Icons.rule_folder_outlined),
-            label: 'Roles',
+            label: 'Turnos',
           ),
         ],
       ),

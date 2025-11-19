@@ -155,30 +155,18 @@ class _RolesScreenState extends State<RolesScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: const Padding(
-          padding: EdgeInsets.all(8.0),
-          child: Icon(Icons.blur_on, size: 32),
-        ),
-        title: Text('Mis turnos', style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
+        automaticallyImplyLeading: false,
+        title: Text('Turnos', style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
       ),
-      body: _isLoading
+      
+      body: 
+        _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Botón Generar Enlace (Placeholder)
-            ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              child: const Text('Generar enlace'),
-            ),
             const SizedBox(height: 24),
 
             // Lista de Turnos
