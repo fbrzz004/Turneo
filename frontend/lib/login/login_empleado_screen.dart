@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:turneo_horarios_app/empleado/turnos_screen.dart';
 import '../services/empleado_service.dart';
+import '../services/user_session.dart';
 import '/registro/registro_empleado_screen.dart';
 
 class LoginEmpleadoScreen extends StatefulWidget {
@@ -44,6 +45,13 @@ class _LoginEmpleadoScreenState extends State<LoginEmpleadoScreen> {
       }
       else {
         // CASO NORMAL: Login exitoso
+        UserSession().login(
+            empleado.id!,
+            empleado.nombre,
+            empleado.correo,
+            empleado.rol, // Aquí viene de la BD
+            false // No es gerente
+        );
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const TurnosScreen()),

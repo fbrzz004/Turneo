@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/gerente_service.dart';
 import '../gerente/gerente_main_screen.dart';
+import '../services/user_session.dart';
 
 class LoginGerenteScreen extends StatefulWidget {
   const LoginGerenteScreen({super.key});
@@ -45,7 +46,13 @@ class _LoginGerenteScreenState extends State<LoginGerenteScreen> {
 
       if (gerente != null) {
         // ¡LOGIN EXITOSO!
-        // Aquí podrías guardar la sesión en SharedPreferences si quisieras
+        UserSession().login(
+            gerente.id!,
+            gerente.nombre,
+            gerente.correo,
+            'Gerente', // El rol lo ponemos manual
+            true // Es gerente
+        );
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const GerenteMainScreen()),
