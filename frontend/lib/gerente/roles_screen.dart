@@ -50,9 +50,35 @@ class _RolesScreenState extends State<RolesScreen> {
   }
 
   Future<void> _eliminarRol(Rol rol) async {
-    if (rol.id != null) {
-      await _rolService.eliminarRol(rol.id!); // Asegúrate de tener este método en RolService
-      _cargarDatos();
+    if (rol.id == null) return;
+
+    // Llamamos al nuevo método seguro
+    final resultado = await _rolService.eliminarRolSeguro(rol.id!, rol.nombre);
+
+    if (resultado['success'] == true) {
+      // Éxito
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(resultado['message']), backgroundColor: Colors.green),
+      );
+      _cargarDatos(); // Recargar lista
+    } else {
+      // Error / Bloqueo
+      if (!mounted) return;
+      // Mostrar alerta explicando por qué no se puede borrar
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text("No se puede eliminar"),
+          content: Text(resultado['message']),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text("Entendido"),
+            )
+          ],
+        ),
+      );
     }
   }
 
