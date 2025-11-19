@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:turneo_horarios_app/services/user_session.dart';
 import '../database/db.dart';
 import '../models/calendario.dart';
 import '../ajustes/ajustes_screen.dart';
@@ -16,11 +17,10 @@ class VerCalendarioEmpleadoScreen extends StatefulWidget {
 }
 
 class _VerCalendarioEmpleadoScreenState extends State<VerCalendarioEmpleadoScreen> {
-  int _selectedIndex = 1; // Estamos en la pestaña Calendario
+  int _selectedIndex = 1;
   bool _isLoading = true;
   Calendario? _calendarioPublicado;
 
-  // Variables para la grilla (Idénticas al gerente)
   List<Map<String, dynamic>> _datosGrilla = [];
   List<String> _nombresDias = [];
 
@@ -32,19 +32,23 @@ class _VerCalendarioEmpleadoScreenState extends State<VerCalendarioEmpleadoScree
 
   Future<void> _cargarUltimoCalendarioPublicado() async {
     final db = await AppDatabase.instance.database;
+    final empleadoId = UserSession().id; // Obtenemos ID del usuario actual
 
-    // 1. Buscar el último calendario con estado 1 (Publicado)
-    final res = await db.query('calendario',
-        where: 'estado = ?',
-        whereArgs: [1],
-        orderBy: 'id DESC',
-        limit: 1
-    );
+    if (empleadoId == null) return;
+
+    // --- CORRECCIÓN 1: FILTRO DE PRIVACIDAD ---
+    // Solo traemos calendarios Publicados (estado=1) DONDE el empleado esté en la lista de participantes
+    final res = await db.rawQuery('''
+      SELECT c.* 
+      FROM calendario c
+      JOIN calendario_participante cp ON c.id = cp.calendario_id
+      WHERE c.estado = 1 AND cp.empleado_id = ?
+      ORDER BY c.id DESC
+      LIMIT 1
+    ''', [empleadoId]);
 
     if (res.isNotEmpty) {
       final cal = Calendario.fromMap(res.first);
-
-      // 2. Cargar la grilla (Misma lógica que el gerente)
       await _cargarGrilla(cal);
 
       if (mounted) {
@@ -61,14 +65,11 @@ class _VerCalendarioEmpleadoScreenState extends State<VerCalendarioEmpleadoScree
   Future<void> _cargarGrilla(Calendario cal) async {
     final db = await AppDatabase.instance.database;
 
-    // Obtener Días
     final dias = await db.query('calendario_dia',
         where: 'calendario_id = ?', whereArgs: [cal.id], orderBy: 'fecha ASC');
 
-    // Obtener Turnos
     final turnos = await db.query('turno');
 
-    // Obtener Asignaciones
     final asignaciones = await db.rawQuery('''
       SELECT a.calendario_dia_id, a.turno_id, e.nombre
       FROM asignacion a
@@ -77,13 +78,12 @@ class _VerCalendarioEmpleadoScreenState extends State<VerCalendarioEmpleadoScree
       WHERE cd.calendario_id = ?
     ''', [cal.id]);
 
-    // Construir Cabeceras
     List<String> headers = dias.map((d) {
       DateTime date = DateTime.parse(d['fecha'] as String);
+      // Asegúrate de tener configurado la localización en main.dart
       return DateFormat('EEEE d', 'es_ES').format(date);
     }).toList();
 
-    // Construir Filas
     List<Map<String, dynamic>> filas = [];
 
     for (var t in turnos) {
@@ -102,7 +102,14 @@ class _VerCalendarioEmpleadoScreenState extends State<VerCalendarioEmpleadoScree
         if (empleadosEnTurno.isEmpty) {
           celdas.add("-");
         } else {
-          celdas.add(empleadosEnTurno.map((e) => e['nombre']).join('\n'));
+          // --- CORRECCIÓN 2: EVITAR DUPLICADOS ---
+          final nombresUnicos = empleadosEnTurno
+              .map((e) => e['nombre'].toString())
+              .toSet() // Elimina repetidos
+              .toList();
+
+          // Unir con saltos de línea para que salga uno debajo de otro
+          celdas.add(nombresUnicos.join('\n'));
         }
       }
       fila['celdas'] = celdas;
@@ -113,7 +120,6 @@ class _VerCalendarioEmpleadoScreenState extends State<VerCalendarioEmpleadoScree
     _datosGrilla = filas;
   }
 
-  // --- PDF (Igual que el gerente, el empleado también puede querer descargarlo) ---
   Future<void> _generarPDF() async {
     if (_calendarioPublicado == null) return;
 
@@ -130,11 +136,13 @@ class _VerCalendarioEmpleadoScreenState extends State<VerCalendarioEmpleadoScree
                 headers: ['Turno', ..._nombresDias.map((d) => d.toUpperCase())],
                 data: _datosGrilla.map((fila) => [
                   "${fila['nombre_turno']}\n${fila['hora']}",
-                  ...fila['celdas']
+                  ...fila['celdas'] // Aquí ya vienen sin duplicados gracias a _cargarGrilla
                 ]).toList(),
                 border: pw.TableBorder.all(),
                 headerDecoration: const pw.BoxDecoration(color: PdfColors.indigo),
                 headerStyle: const pw.TextStyle(color: PdfColors.white),
+                cellAlignment: pw.Alignment.center,
+                cellStyle: const pw.TextStyle(fontSize: 10),
               ),
             ],
           );
@@ -147,6 +155,7 @@ class _VerCalendarioEmpleadoScreenState extends State<VerCalendarioEmpleadoScree
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -167,14 +176,13 @@ class _VerCalendarioEmpleadoScreenState extends State<VerCalendarioEmpleadoScree
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Título del calendario
             Text(
                 _calendarioPublicado!.nombre,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)
+                style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)
             ),
             const SizedBox(height: 16),
 
-            // LA GRILLA (Idéntica visualmente)
+            // --- CORRECCIÓN 3: VISUALIZACIÓN EXPANDIBLE ---
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
@@ -186,6 +194,10 @@ class _VerCalendarioEmpleadoScreenState extends State<VerCalendarioEmpleadoScree
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: DataTable(
+                      // Permite que la fila crezca para mostrar todos los nombres
+                      dataRowMaxHeight: double.infinity,
+                      dataRowMinHeight: 60, // Altura mínima para que se vea bien
+
                       headingRowColor: MaterialStateProperty.all(colorScheme.primaryContainer),
                       columns: [
                         const DataColumn(label: Text("TURNO", style: TextStyle(fontWeight: FontWeight.bold))),
@@ -196,17 +208,20 @@ class _VerCalendarioEmpleadoScreenState extends State<VerCalendarioEmpleadoScree
                       rows: _datosGrilla.map((fila) {
                         return DataRow(
                             cells: [
-                              DataCell(Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(fila['nombre_turno'], style: const TextStyle(fontWeight: FontWeight.bold)),
-                                  Text(fila['hora'], style: const TextStyle(fontSize: 10)),
-                                ],
+                              DataCell(Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(fila['nombre_turno'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                                    Text(fila['hora'], style: const TextStyle(fontSize: 10)),
+                                  ],
+                                ),
                               )),
                               ... (fila['celdas'] as List<String>).map((celda) => DataCell(
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 8.0),
                                     child: Text(celda, textAlign: TextAlign.center),
                                   )
                               )),
@@ -221,7 +236,6 @@ class _VerCalendarioEmpleadoScreenState extends State<VerCalendarioEmpleadoScree
 
             const SizedBox(height: 16),
 
-            // Botón PDF
             ElevatedButton.icon(
               onPressed: _generarPDF,
               icon: const Icon(Icons.download),
@@ -236,7 +250,6 @@ class _VerCalendarioEmpleadoScreenState extends State<VerCalendarioEmpleadoScree
         selectedIndex: _selectedIndex,
         onDestinationSelected: (int index) {
           if (index == 0) {
-            // Ir a Turnos
             Navigator.pushReplacement(
               context,
               PageRouteBuilder(
@@ -267,13 +280,18 @@ class _VerCalendarioEmpleadoScreenState extends State<VerCalendarioEmpleadoScree
 
   Widget _buildEstadoVacio() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Icon(Icons.calendar_today_outlined, size: 60, color: Colors.grey),
-          SizedBox(height: 16),
-          Text("No hay calendarios publicados aún."),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.calendar_today_outlined, size: 60, color: Colors.grey),
+            SizedBox(height: 16),
+            Text("No tienes calendarios asignados.", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            SizedBox(height: 8),
+            Text("Cuando el gerente publique un horario en el que participas, aparecerá aquí.", textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+          ],
+        ),
       ),
     );
   }
